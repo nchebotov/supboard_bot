@@ -1,4 +1,5 @@
 import asyncio
+import time
 from datetime import datetime, timedelta
 
 from aiogram import Bot, Dispatcher, F
@@ -390,5 +391,6 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
+    time.sleep(30)
     database.init_db()
     asyncio.run(main())
