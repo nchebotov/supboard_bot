@@ -10,7 +10,7 @@ env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)
 
 
-RENTAL_RATE = float(os.getenv('RENTAL_RATE', None))
+RENTAL_RATE = float(os.getenv('RENTAL_RATE', 500.00))
 BOT_TOKEN = os.getenv('BOT_TOKEN', None)
 ADMINS = [
     int(x)
