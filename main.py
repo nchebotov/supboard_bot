@@ -421,11 +421,14 @@ async def btn_help(message: Message):
 
 
 async def main():
-    print("Ждём 30 секунд перед стартом, чтобы избежать конфликта...")
-    time.sleep(30)
-    await dp.start_polling(bot)
+    logging.info("Ждём 15 секунд перед стартом, чтобы избежать конфликта...")
+    time.sleep(15)
+    logging.info("Бот запущен")
+    try:
+        await dp.start_polling(bot)
+    finally:
+        logging.info("Бот остановлен")
 
 if __name__ == "__main__":
-    logging.info("Бот стартует...")
     database.init_db()
     asyncio.run(main())
