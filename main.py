@@ -60,7 +60,7 @@ def is_admin(user_id):
 
 
 def format_time(t):
-    return t.strftime("%Y-%m-%d %H:%M")
+    return t.strftime("%H:%M %Y-%m-%d")
 
 
 @dp.startup()
