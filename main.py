@@ -140,7 +140,7 @@ async def cmd_rent(message: Message, state: FSMContext):
 async def choose_hours(query: CallbackQuery, state: FSMContext):
     sapboard_id = query.data
     await state.update_data(sapboard_id=sapboard_id)
-    await query.message.edit_text("Введите продолжительность аренды в часах, минимально 0.5 (30 минут):")
+    await query.message.edit_text("Введите продолжительность аренды в часах, минимально 0.5 (30 минут), максильно 12 часов:")
     await state.set_state(RentStates.entering_hours)
 
 
