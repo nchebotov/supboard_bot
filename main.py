@@ -16,10 +16,18 @@ from aiogram.types import (
 from config import BOT_TOKEN, ADMINS, SAPBOARDS, RENTAL_RATE
 import database
 import gsheet
+import logging
+import pytz
+
+
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
+logging.basicConfig(level=logging.INFO)
 
+
+def get_saratov_time():
+    return datetime.now(tz=pytz.timezone("Europe/Saratov"))
 
 # FSM состояния
 class RentStates(StatesGroup):
@@ -52,7 +60,7 @@ def is_admin(user_id):
 
 
 def format_time(t):
-    return t.strftime("%H:%M")
+    return t.strftime("%Y-%m-%d %H:%M")
 
 
 @dp.startup()
@@ -125,11 +133,15 @@ async def confirm_rental(message: Message, state: FSMContext):
     try:
         hours = float(message.text)
     except ValueError:
-        await message.answer("❌ Введите число, например: 0.5, 1.5, 2")
+        await message.answer("❌ Введите число, например: 0.5, 1.5, 2 и т.д")
         return
 
     if hours < 0.5:
         await message.answer("❌ Минимальное время аренды — 0.5 часа (30 минут). Попробуйте ещё раз:")
+        return
+
+    if 12 < hours:
+        await message.answer("❌ Максимальное время аренды — 12 часов. Попробуйте ещё раз:")
         return
 
     data = await state.get_data()
@@ -162,7 +174,7 @@ async def process_confirmation(query: CallbackQuery, state: FSMContext):
         admin_id = query.from_user.id
         admin_name = query.from_user.full_name
 
-        start_time = datetime.now()
+        start_time = get_saratov_time()
         end_time = start_time + timedelta(hours=hours)
 
         database.add_rental_start(
@@ -215,7 +227,7 @@ async def process_confirmation(query: CallbackQuery, state: FSMContext):
 
 
 async def send_reminder(admin_id, end_time, sapboard_id, admin_name, user_id):
-    now = datetime.now()
+    now = get_saratov_time()
     delta = (end_time - now).total_seconds()
     if delta > 300:
         await asyncio.sleep(delta - 300)
@@ -257,9 +269,10 @@ async def cmd_status(message: Message):
     text = "🕒 Активные аренды:\n"
     for user_id, info in active_rentals.items():
         text += (
-            f"👤 Клиент ID: {user_id}\n"
-            f"🛹 Сапборд: name={info['sapboard_name']}; id={info['sapboard_id']}\n"
-            f"🧑‍💼 Админ: {info['admin_name']} (ID: {info['admin_id']})\n"
+            f"👤 Админ: {info['admin_name']}\n"
+            f"👤 Админ ID: {info['admin_id']}\n"
+            f"🛹 Сапборд: {info['sapboard_name']}\n"
+            f"🧑‍💼 Сапборд ID: {info['sapboard_id']}\n"
             f"⏰ Вернуть до: {format_time(info['end_time'])}\n"
             "───────────────\n"
         )
@@ -358,7 +371,7 @@ async def cmd_history(message: Message):
     for entry in filtered[:10]:  # показываем первые 10 записей
         text += (
             f"👤 Клиент: {entry['user_id']}\n"
-            f"🛹 Сапборд: name={entry['sapboard_name']}; id=({entry['sapboard_id']})\n"
+            f"🛹 Сапборд: {entry['sapboard_name']}; id=({entry['sapboard_id']})\n"
             f"🧑‍💼 Админ: {entry['admin_name']} (ID: {entry['admin_id']})\n"
             f"📅 Начало: {entry['start']}\n"
             f"🕒 Длительность: {entry['duration']:.2f} ч.\n"
@@ -388,9 +401,11 @@ async def btn_help(message: Message):
 
 
 async def main():
+    print("Ждём 30 секунд перед стартом, чтобы избежать конфликта...")
+    time.sleep(30)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    time.sleep(30)
+    logging.info("Бот стартует...")
     database.init_db()
     asyncio.run(main())
