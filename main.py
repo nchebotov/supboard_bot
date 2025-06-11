@@ -90,7 +90,6 @@ async def cmd_help(message: Message):
         "/help — Показать это меню\n"
         "/rent — Начать новую аренду (выбор доски, времени)\n"
         "/status — Посмотреть текущие активные аренды\n"
-        f"/end <ID клиента> — Завершить аренду вручную. Список id=[{list(SAPBOARDS.keys())}]\n"
         "/export — Получить ссылку на Google Таблицу со статистикой\n"
         "/history — вся история\n"
         "/history sapboard=1 — только по сапборду 1\n"
