@@ -102,16 +102,37 @@ async def cmd_help(message: Message):
 @dp.message(Command("rent"))
 async def cmd_rent(message: Message, state: FSMContext):
     if not is_admin(message.from_user.id):
-        await message.answer("У вас нет прав администратора.")
+        await message.answer("❌ У вас нет прав администратора.")
+        return
+
+    available_boards = {
+        sid: name for sid, name in SAPBOARDS.items()
+        if sid not in {info["sapboard_id"] for info in active_rentals.values()}
+    }
+
+    if not available_boards:
+        # Все доски заняты — находим самую раннюю дату окончания аренды
+        earliest_end = min(info["end_time"] for info in active_rentals.values())
+        delta = earliest_end - datetime.now()
+        minutes = int(delta.total_seconds() // 60)
+        hours = minutes // 60
+        mins = minutes % 60
+        board_id = min(active_rentals.values(), key=lambda x: x["end_time"])["sapboard_id"]
+        board_name = SAPBOARDS.get(board_id, "Неизвестная доска")
+
+        await message.answer(
+            f"❌ Все доски заняты. Следующая свободная через {hours} ч. {mins} мин. (до окончания аренды доски *{board_name}*).",
+            parse_mode="Markdown"
+        )
         return
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=name, callback_data=sid)]
-            for sid, name in SAPBOARDS.items()
+            for sid, name in available_boards.items()
         ]
     )
-    await message.answer("Выберите сапборд:", reply_markup=keyboard)
+    await message.answer("Выберите свободный сапборд:", reply_markup=keyboard)
     await state.set_state(RentStates.choosing_sapboard)
 
 
