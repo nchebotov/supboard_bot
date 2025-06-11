@@ -113,7 +113,7 @@ async def cmd_rent(message: Message, state: FSMContext):
     if not available_boards:
         # Все доски заняты — находим самую раннюю дату окончания аренды
         earliest_end = min(info["end_time"] for info in active_rentals.values())
-        delta = earliest_end - datetime.now()
+        delta = earliest_end - get_saratov_time()
         minutes = int(delta.total_seconds() // 60)
         hours = minutes // 60
         mins = minutes % 60
