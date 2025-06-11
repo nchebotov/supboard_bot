@@ -72,7 +72,7 @@ async def on_startup():
 async def cmd_start(message: Message):
     if is_admin(message.from_user.id):
         await message.answer(
-            f"Привет, {message.from_user.username}!\n Используйте /help чтобы посмотреть список команд.",
+            f"Привет, {message.from_user.username}!\nИспользуйте /help чтобы посмотреть список команд.",
             reply_markup=main_keyboard
         )
     else:
@@ -253,7 +253,7 @@ async def cmd_status(message: Message):
     if not is_admin(message.from_user.id):
         return
 
-    now = datetime.now()
+    now = get_saratov_time()
     expired = []
 
     # Удаление просроченных аренд
