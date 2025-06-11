@@ -18,7 +18,7 @@ ADMINS = [
 ]
 
 # Настройки Google Sheets
-GS_CREDENTIALS = Path('.') / 'supboard.json'  #str(os.getenv('CREDENTIALS'))  # Str JSON
+GS_CREDENTIALS = json.loads(os.getenv('CREDENTIALS'))
 GS_SPREADSHEET_ID = os.getenv('GS_SPREADSHEET_ID')        # ID существующей таблицы
 GS_WORKSHEET_NAME = 'Лист1'            # имя листа (или можно оставить 'Sheet1')
 GS_URL_TEMPLATE = 'https://docs.google.com/spreadsheets/d/{sheet_id}/view?usp=sharing'
